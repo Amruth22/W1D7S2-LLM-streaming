@@ -4,12 +4,12 @@ A simple AI-powered study assistant with LLM streaming, vector search, and real-
 
 ## Architecture
 
-**Two-Server Setup:**
+**API-Only System:**
 - **FastAPI Backend** (Port 8080): Handles AI, vector search, and data
-- **Streamlit Frontend** (Port 8081): Provides user interface
+- **REST API Endpoints**: Complete API for external clients
 
 ```
-Streamlit (8081) → HTTP requests → FastAPI (8080) → Gemini API + FAISS
+Client Applications → HTTP requests → FastAPI (8080) → Gemini API + FAISS
 ```
 
 ## Features
@@ -19,14 +19,15 @@ Streamlit (8081) → HTTP requests → FastAPI (8080) → Gemini API + FAISS
 - **Smart Search**: FAISS vector database for semantic search
 - **Intelligent Flow**: Search materials first, then ask AI
 - **Material Management**: Upload and organize study content
-- **Visual Streaming**: See AI responses appear word-by-word in real-time
+- **Server-Sent Events**: Real-time streaming via SSE
 
 ### Technical Features
-- **Clean Architecture**: Separate FastAPI backend and Streamlit frontend
+- **FastAPI Backend**: High-performance API server
 - **Server-Sent Events**: Proper streaming implementation
 - **Simple Setup**: No complex database configuration
 - **Vector Embeddings**: Semantic similarity search
 - **REST API**: Well-defined API endpoints with streaming support
+- **Real Integration Tests**: Live API testing with actual server
 
 ## Quick Start
 
@@ -40,44 +41,61 @@ pip install -r requirements.txt
    - Add your Gemini API key
    - Get key from: https://makersuite.google.com/app/apikey
 
-3. **Run the system:**
+3. **Run the API server:**
 ```bash
 python run.py
 ```
-
-4. **Access the app:**
-   - FastAPI Backend: http://localhost:8080
-   - Streamlit Frontend: http://localhost:8081
-   - Experience real-time streaming responses!
-
-## Manual Setup
-
-**Start Backend (Terminal 1):**
+   Or directly:
 ```bash
 python fastapi_server.py
 ```
 
-**Start Frontend (Terminal 2):**
+4. **Access the API:**
+   - API Server: http://localhost:8080
+   - API Documentation: http://localhost:8080/docs
+   - Experience real-time streaming via API endpoints!
+
+## Manual Setup
+
+**Start API Server:**
 ```bash
-streamlit run streamlit_app.py --server.port 8081
+python fastapi_server.py
 ```
 
-## Usage
+**Access API Documentation:**
+- Interactive docs: http://localhost:8080/docs
+- OpenAPI spec: http://localhost:8080/openapi.json
+
+## API Usage
 
 1. **Add Study Materials:**
-   - Use the sidebar form
-   - Fill in title, subject, chapter, content
-   - Materials are automatically indexed
+```bash
+curl -X POST "http://localhost:8080/materials" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Python Basics","content":"Python is...","subject":"Programming"}'
+```
 
-2. **Ask Questions:**
-   - Type questions in the chat
-   - System searches materials first
-   - AI provides context-aware answers
+2. **Search Materials:**
+```bash
+curl -X POST "http://localhost:8080/search" \
+  -H "Content-Type: application/json" \
+  -d '{"question":"What is Python?"}'
+```
 
-3. **View Results:**
-   - See relevant materials highlighted
-   - Get AI responses with context
-   - Browse all uploaded materials
+3. **Ask AI (Simple):**
+```bash
+curl -X POST "http://localhost:8080/ask" \
+  -H "Content-Type: application/json" \
+  -d '{"question":"Explain machine learning"}'
+```
+
+4. **Ask AI (Streaming):**
+```bash
+curl -X POST "http://localhost:8080/ask-stream" \
+  -H "Content-Type: application/json" \
+  -d '{"question":"Explain AI"}' \
+  --no-buffer
+```
 
 ## API Endpoints
 
@@ -91,52 +109,34 @@ streamlit run streamlit_app.py --server.port 8081
 
 ## Testing
 
-### Unit Tests
-Run core component tests:
+### Integration Tests
+Run real API integration tests:
 ```bash
 python unit_test.py
 ```
 
 Tests cover:
-- Gemini client initialization
-- Study materials management
-- Vector store operations
-- Document indexing
-- Streaming functionality
-- WebSocket message formats
-- API endpoint structures
-- Concurrent streaming simulation
-- Server-Sent Events format
-
-### Integration Tests
-Run WebSocket and streaming integration tests:
-```bash
-python websocket_test.py
-```
-
-Integration tests cover:
-- Real API endpoint testing
-- Live streaming responses
-- Server-Sent Events (SSE)
-- Concurrent streaming requests
-- Error handling in streams
-- Response format validation
-- End-to-end streaming flow
+- **Real API endpoint testing** - Live server testing
+- **Live streaming responses** - Actual SSE streaming
+- **Materials management** - CRUD operations
+- **Vector search** - FAISS integration
+- **Concurrent streaming** - Multiple simultaneous requests
+- **Error handling** - Graceful failure management
+- **Response validation** - Format and content verification
+- **End-to-end flow** - Complete API workflow
 
 ## Project Structure
 
 ```
-├── fastapi_server.py      # Backend API server with streaming
-├── streamlit_app.py       # Basic frontend interface
-├── streamlit_streaming.py # Optimized streaming frontend
+├── fastapi_server.py      # Main API server with streaming
 ├── gemini_client.py       # Gemini API integration
 ├── vector_store.py        # FAISS vector database
 ├── study_materials.py     # Materials management
 ├── config.py              # Configuration
-├── unit_test.py           # Unit tests (10 tests)
-├── websocket_test.py      # WebSocket & streaming integration tests
-├── run.py                 # Startup script
-├── requirements.txt       # Dependencies
+├── unit_test.py           # Real integration tests (8 tests)
+├── run.py                 # API startup script
+├── requirements.txt       # API dependencies
+├── README.md              # Documentation
 └── data/
     ├── study_materials.json    # Materials storage
     └── faiss_index/           # Vector index files
@@ -158,19 +158,21 @@ STREAMLIT_PORT = 8081
 - Verify Gemini API key
 - Install missing dependencies
 
-**Frontend connection error:**
-- Ensure backend is running first
-- Check FASTAPI_URL in config
-- Try refreshing the page
+**API connection error:**
+- Ensure API server is running on port 8080
+- Check if port 8080 is available
+- Verify API endpoints at http://localhost:8080/docs
 
 **Search not working:**
 - Upload some materials first
 - Wait for indexing to complete
 - Check vector store initialization
 
-## Simple and Student-Friendly
+## Simple and Developer-Friendly
 
 - **No complex setup** - Just run and use
-- **Clean interface** - Focus on learning
+- **Clean API** - Well-documented endpoints
 - **Fast responses** - Optimized for speed
-- **Easy deployment** - Portable JSON storage
+- **Easy integration** - Standard REST API
+- **Real-time streaming** - Server-Sent Events
+- **Portable storage** - JSON-based data
