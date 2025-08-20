@@ -1,8 +1,10 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from typing import List, Dict, Optional
 import uvicorn
+import json
 
 from gemini_client import GeminiClient
 from vector_store import VectorStore
@@ -150,6 +152,47 @@ async def ask_question(request: QuestionRequest):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/ask-stream")
+async def ask_question_stream(request: QuestionRequest):
+    """Stream AI response to question"""
+    async def generate_stream():
+        try:
+            # First search for relevant materials
+            query_embeddings = gemini_client.get_embeddings([request.question])
+            context = ""
+            
+            if query_embeddings:
+                results = vector_store.search(query_embeddings[0], k=3)
+                relevant_results = [
+                    text for text, score, metadata in results 
+                    if score >= config.SIMILARITY_THRESHOLD
+                ]
+                context = "\n".join(relevant_results[:2])
+            
+            # Send context info first
+            yield f"data: {json.dumps({'type': 'context', 'context_used': bool(context), 'context': context[:200] + '...' if len(context) > 200 else context})}\n\n"
+            
+            # Stream AI response
+            for chunk in gemini_client.stream_response(request.question, context):
+                if chunk:
+                    yield f"data: {json.dumps({'type': 'chunk', 'content': chunk})}\n\n"
+            
+            # Send completion signal
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+            
+        except Exception as e:
+            yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+    
+    return StreamingResponse(
+        generate_stream(),
+        media_type="text/plain",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "Content-Type": "text/event-stream",
+        }
+    )
 
 @app.get("/stats")
 async def get_stats():
