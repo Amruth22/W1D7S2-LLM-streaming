@@ -91,7 +91,8 @@ streamlit run streamlit_app.py --server.port 8081
 
 ## Testing
 
-Run unit tests:
+### Unit Tests
+Run core component tests:
 ```bash
 python unit_test.py
 ```
@@ -101,7 +102,26 @@ Tests cover:
 - Study materials management
 - Vector store operations
 - Document indexing
-- Basic functionality
+- Streaming functionality
+- WebSocket message formats
+- API endpoint structures
+- Concurrent streaming simulation
+- Server-Sent Events format
+
+### Integration Tests
+Run WebSocket and streaming integration tests:
+```bash
+python websocket_test.py
+```
+
+Integration tests cover:
+- Real API endpoint testing
+- Live streaming responses
+- Server-Sent Events (SSE)
+- Concurrent streaming requests
+- Error handling in streams
+- Response format validation
+- End-to-end streaming flow
 
 ## Project Structure
 
@@ -113,7 +133,8 @@ Tests cover:
 ├── vector_store.py        # FAISS vector database
 ├── study_materials.py     # Materials management
 ├── config.py              # Configuration
-├── unit_test.py           # Unit tests
+├── unit_test.py           # Unit tests (10 tests)
+├── websocket_test.py      # WebSocket & streaming integration tests
 ├── run.py                 # Startup script
 ├── requirements.txt       # Dependencies
 └── data/
