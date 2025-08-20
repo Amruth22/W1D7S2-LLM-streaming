@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Startup script for Smart Study Buddy System
-Runs FastAPI backend (8080) and Streamlit frontend (8081)
+Startup script for Smart Study Buddy API System
+Runs FastAPI backend server on port 8080
 """
 
 import os
@@ -15,7 +15,6 @@ def check_requirements():
     """Check if required packages are installed"""
     try:
         import fastapi
-        import streamlit
         import google.genai
         import faiss
         import numpy
@@ -37,35 +36,21 @@ def create_directories():
             print(f"✓ Created directory: {directory}")
 
 def start_fastapi():
-    """Start FastAPI backend server"""
-    print(f"Starting FastAPI backend on port {config.FASTAPI_PORT}...")
+    """Start FastAPI API server"""
+    print(f"Starting FastAPI API server on port {config.FASTAPI_PORT}...")
     try:
         subprocess.run([
             sys.executable, "fastapi_server.py"
         ], check=True)
     except KeyboardInterrupt:
-        print("FastAPI server stopped")
+        print("API server stopped")
     except Exception as e:
-        print(f"FastAPI error: {e}")
-
-def start_streamlit():
-    """Start Streamlit frontend"""
-    print(f"Starting Streamlit frontend on port {config.STREAMLIT_PORT}...")
-    try:
-        subprocess.run([
-            "streamlit", "run", "streamlit_streaming.py",
-            "--server.port", str(config.STREAMLIT_PORT),
-            "--server.address", "localhost"
-        ], check=True)
-    except KeyboardInterrupt:
-        print("Streamlit app stopped")
-    except Exception as e:
-        print(f"Streamlit error: {e}")
+        print(f"API server error: {e}")
 
 def main():
     """Main startup function"""
-    print("Smart Study Buddy System Startup")
-    print("=" * 40)
+    print("Smart Study Buddy API Server Startup")
+    print("=" * 45)
     
     # Check requirements
     if not check_requirements():
@@ -79,26 +64,19 @@ def main():
         print("✗ config.py not found!")
         sys.exit(1)
     
-    print("\n" + "=" * 40)
-    print("Starting servers...")
-    print(f"FastAPI Backend: http://localhost:{config.FASTAPI_PORT}")
-    print(f"Streamlit Frontend: http://localhost:{config.STREAMLIT_PORT}")
-    print("Press Ctrl+C to stop both servers")
-    print("=" * 40)
+    print("\n" + "=" * 45)
+    print("Starting API server...")
+    print(f"API Server: http://localhost:{config.FASTAPI_PORT}")
+    print(f"API Docs: http://localhost:{config.FASTAPI_PORT}/docs")
+    print("Press Ctrl+C to stop the server")
+    print("=" * 45)
     
     try:
-        # Start FastAPI in background thread
-        fastapi_thread = threading.Thread(target=start_fastapi, daemon=True)
-        fastapi_thread.start()
-        
-        # Wait a moment for FastAPI to start
-        time.sleep(3)
-        
-        # Start Streamlit in main thread
-        start_streamlit()
+        # Start FastAPI server
+        start_fastapi()
         
     except KeyboardInterrupt:
-        print("\nShutting down servers...")
+        print("\nShutting down API server...")
     except Exception as e:
         print(f"Error: {e}")
 
