@@ -15,16 +15,18 @@ Streamlit (8081) → HTTP requests → FastAPI (8080) → Gemini API + FAISS
 ## Features
 
 ### Core Functionality
-- **LLM Streaming**: Real-time responses from Gemini 2.0 Flash
+- **Real-time LLM Streaming**: Live streaming responses from Gemini 2.0 Flash
 - **Smart Search**: FAISS vector database for semantic search
 - **Intelligent Flow**: Search materials first, then ask AI
 - **Material Management**: Upload and organize study content
+- **Visual Streaming**: See AI responses appear word-by-word in real-time
 
 ### Technical Features
-- **Clean Architecture**: Separate frontend and backend
+- **Clean Architecture**: Separate FastAPI backend and Streamlit frontend
+- **Server-Sent Events**: Proper streaming implementation
 - **Simple Setup**: No complex database configuration
 - **Vector Embeddings**: Semantic similarity search
-- **REST API**: Well-defined API endpoints
+- **REST API**: Well-defined API endpoints with streaming support
 
 ## Quick Start
 
@@ -46,6 +48,7 @@ python run.py
 4. **Access the app:**
    - FastAPI Backend: http://localhost:8080
    - Streamlit Frontend: http://localhost:8081
+   - Experience real-time streaming responses!
 
 ## Manual Setup
 
@@ -82,7 +85,8 @@ streamlit run streamlit_app.py --server.port 8081
 - `POST /materials` - Add new material
 - `GET /materials` - Get all materials
 - `POST /search` - Search materials
-- `POST /ask` - Ask AI question
+- `POST /ask` - Ask AI question (simple response)
+- `POST /ask-stream` - Ask AI question (streaming response)
 - `GET /stats` - System statistics
 
 ## Testing
@@ -102,8 +106,9 @@ Tests cover:
 ## Project Structure
 
 ```
-├── fastapi_server.py      # Backend API server
-├── streamlit_app.py       # Frontend interface
+├── fastapi_server.py      # Backend API server with streaming
+├── streamlit_app.py       # Basic frontend interface
+├── streamlit_streaming.py # Optimized streaming frontend
 ├── gemini_client.py       # Gemini API integration
 ├── vector_store.py        # FAISS vector database
 ├── study_materials.py     # Materials management
