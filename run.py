@@ -53,7 +53,7 @@ def start_streamlit():
     print(f"Starting Streamlit frontend on port {config.STREAMLIT_PORT}...")
     try:
         subprocess.run([
-            "streamlit", "run", "streamlit_app.py",
+            "streamlit", "run", "streamlit_streaming.py",
             "--server.port", str(config.STREAMLIT_PORT),
             "--server.address", "localhost"
         ], check=True)
