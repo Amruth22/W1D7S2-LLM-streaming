@@ -30,6 +30,6 @@ EMBEDDING_DIMENSION = int(os.getenv("EMBEDDING_DIMENSION", 768))
 MAX_SEARCH_RESULTS = int(os.getenv("MAX_SEARCH_RESULTS", 5))
 SIMILARITY_THRESHOLD = float(os.getenv("SIMILARITY_THRESHOLD", 0.7))
 
-# File Paths
-STUDY_MATERIALS_FILE = "data/study_materials.json"
-FAISS_INDEX_PATH = "data/faiss_index"
+# File Paths - can be overridden via environment variables
+STUDY_MATERIALS_FILE = os.getenv("STUDY_MATERIALS_FILE", "data/study_materials.json")
+FAISS_INDEX_PATH = os.getenv("FAISS_INDEX_PATH", "data/faiss_index")
