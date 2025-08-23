@@ -42,9 +42,18 @@ pip install -r requirements.txt
 ```
 
 4. **Configure API key:**
-   - Edit `config.py`
-   - Add your Gemini API key
-   - Get key from: https://makersuite.google.com/app/apikey
+   ```bash
+   # Copy the environment template
+   cp .env.example .env
+   
+   # Edit .env file and add your Gemini API key
+   # Get key from: https://makersuite.google.com/app/apikey
+   ```
+   
+   **In .env file:**
+   ```bash
+   GEMINI_API_KEY=your-actual-api-key-here
+   ```
 
 5. **Start the API server:**
 ```bash
@@ -286,9 +295,11 @@ SIMILARITY_THRESHOLD = 0.7
 - Install missing dependencies: `pip install -r requirements.txt`
 
 **Gemini API errors:**
-- Verify API key is valid and active
+- Check `.env` file exists and contains valid API key
+- Verify API key is active: https://makersuite.google.com/app/apikey
 - Check internet connection
 - Monitor API quotas and limits
+- Ensure `python-dotenv` is installed: `pip install python-dotenv`
 
 **Vector search not working:**
 - Upload study materials first via `/materials` endpoint
