@@ -66,7 +66,20 @@ class MockGeminiClient:
         # Setup responses
         mock_response = MockGeminiResponse()
         self.models.generate_content.return_value = mock_response
-        self.models.embed_content.return_value = MockEmbeddingResponse()
+        
+        # Setup embedding response that adapts to input size
+        def mock_embed_content(*args, **kwargs):
+            # Get the contents/texts from the call
+            if args and hasattr(args[0], 'contents'):
+                contents = args[0].contents
+                if isinstance(contents, list):
+                    # Return embeddings for each text
+                    embeddings = [MOCK_EMBEDDING_RESPONSE[0] for _ in contents]
+                    return MockEmbeddingResponse(embeddings)
+            # Default single embedding
+            return MockEmbeddingResponse()
+        
+        self.models.embed_content.side_effect = mock_embed_content
         
         # Setup streaming
         def mock_stream():
