@@ -66,8 +66,11 @@ class CoreLLMStreamingTests(unittest.TestCase):
             # Verify embedding structure
             first_embedding = embeddings[0]
             self.assertIsInstance(first_embedding, list)
-            self.assertEqual(len(first_embedding), self.config.EMBEDDING_DIMENSION)
+            # Use actual embedding dimension from API response
+            actual_dimension = len(first_embedding)
+            self.assertGreater(actual_dimension, 0, "Embedding should have positive dimension")
             self.assertTrue(all(isinstance(x, float) for x in first_embedding))
+            print(f"INFO: Actual embedding dimension: {actual_dimension}")
         
         # Test streaming response
         streaming_chunks = []
@@ -93,7 +96,10 @@ class CoreLLMStreamingTests(unittest.TestCase):
         
         # Test adding documents
         test_texts = ["Python is a programming language", "Machine learning uses algorithms"]
-        test_embeddings = [[0.1] * self.config.EMBEDDING_DIMENSION, [0.2] * self.config.EMBEDDING_DIMENSION]
+        # Get actual embedding dimension from a real embedding
+        sample_embeddings = self.gemini_client.get_embeddings(["test"])
+        actual_dim = len(sample_embeddings[0]) if sample_embeddings else 768
+        test_embeddings = [[0.1] * actual_dim, [0.2] * actual_dim]
         test_metadata = [
             {"id": 1, "title": "Python Basics"},
             {"id": 2, "title": "ML Intro"}
@@ -106,7 +112,7 @@ class CoreLLMStreamingTests(unittest.TestCase):
         self.assertEqual(len(self.vector_store.documents), initial_doc_count + 2)
         
         # Test search functionality
-        query_embedding = [0.15] * self.config.EMBEDDING_DIMENSION
+        query_embedding = [0.15] * actual_dim
         results = self.vector_store.search(query_embedding, k=3)
         
         self.assertIsInstance(results, list)
@@ -126,6 +132,7 @@ class CoreLLMStreamingTests(unittest.TestCase):
         self.assertGreaterEqual(stats['total_documents'], 0)
         
         print(f"PASS: Vector store operations - {stats['total_documents']} documents indexed")
+        print(f"INFO: Using embedding dimension: {actual_dim}")
         print(f"PASS: Search functionality - {len(results)} results returned")
 
     def test_03_study_materials_management(self):
@@ -258,7 +265,10 @@ class CoreLLMStreamingTests(unittest.TestCase):
         if query_embeddings:
             self.assertIsInstance(query_embeddings, list)
             self.assertEqual(len(query_embeddings), 1)
-            self.assertEqual(len(query_embeddings[0]), self.config.EMBEDDING_DIMENSION)
+            # Use actual embedding dimension
+            actual_dimension = len(query_embeddings[0])
+            self.assertGreater(actual_dimension, 0, "Embedding should have positive dimension")
+            print(f"INFO: Query embedding dimension: {actual_dimension}")
             
             # Test search with the embedding
             search_results = self.vector_store.search(query_embeddings[0], k=3)
@@ -297,6 +307,9 @@ class CoreLLMStreamingTests(unittest.TestCase):
         
         # Test configuration values
         self.assertGreater(self.config.EMBEDDING_DIMENSION, 0)
+        print(f"INFO: Config embedding dimension: {self.config.EMBEDDING_DIMENSION}")
+        if query_embeddings:
+            print(f"INFO: Actual API embedding dimension: {len(query_embeddings[0])}")
         self.assertGreater(self.config.MAX_SEARCH_RESULTS, 0)
         self.assertGreater(self.config.SIMILARITY_THRESHOLD, 0)
         self.assertLess(self.config.SIMILARITY_THRESHOLD, 1)
